@@ -15,14 +15,13 @@
 **/test_snapshots/
 
 # Env / secrets
-.env
-.env.*
 !.env.example
 *.key
 
 # Editor / OS
 .DS_Store
 .idea/
-.vscode/
 *.swp
 *~
+config.bat
+node_modules

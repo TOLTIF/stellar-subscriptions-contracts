@@ -37,6 +37,17 @@ pub struct SubscriptionRecord {
 }
 ```
 
+## Events
+
+Each successful write emits exactly one event. A rejected call emits nothing.
+
+| Event | Emitted by | Data |
+|---|---|---|
+| `Registered` | `register_subscription` | `subscription_id`, `total_subscriptions` (new total) |
+| `Updated` | `update_subscription` | `subscription_id`, `total_charged`, `status` (new values) |
+
+Indexers can follow these events instead of polling `get_stats`.
+
 ## Functions
 
 | Function | Caller | Notes |
