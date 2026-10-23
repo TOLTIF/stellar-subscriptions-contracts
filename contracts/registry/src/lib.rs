@@ -20,7 +20,27 @@ pub use types::{
     STATUS_PAUSED,
 };
 
-use soroban_sdk::{contract, contractimpl, Address, Env, Vec};
+use soroban_sdk::{contract, contractevent, contractimpl, Address, Env, Vec};
+
+/// Emitted once per newly registered subscription.
+#[contractevent]
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct Registered {
+    pub subscription_id: u64,
+    pub total_subscriptions: u64,
+    pub active_subscriptions: u64,
+}
+
+/// Emitted once per accepted subscription update.
+#[contractevent]
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct Updated {
+    pub subscription_id: u64,
+    pub total_charged: i128,
+    pub status: u32,
+    pub total_charged_volume: i128,
+    pub active_subscriptions: u64,
+}
 
 #[contract]
 pub struct RegistryContract;
@@ -120,6 +140,13 @@ impl RegistryContract {
             .ok_or(Error::Overflow)?;
         storage::write_stats(&env, &stats);
         storage::bump_instance(&env);
+
+        Registered {
+            subscription_id,
+            total_subscriptions: stats.total_subscriptions,
+            active_subscriptions: stats.active_subscriptions,
+        }
+        .publish(&env);
         Ok(())
     }
 
@@ -177,6 +204,15 @@ impl RegistryContract {
         storage::write_record(&env, &record);
         storage::write_stats(&env, &stats);
         storage::bump_instance(&env);
+
+        Updated {
+            subscription_id,
+            total_charged,
+            status,
+            total_charged_volume: stats.total_charged_volume,
+            active_subscriptions: stats.active_subscriptions,
+        }
+        .publish(&env);
         Ok(())
     }
 
